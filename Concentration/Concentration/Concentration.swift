@@ -8,6 +8,9 @@
 
 import Foundation
 
+
+// Copied extensions from https://github.com/apple/example-package-fisheryates
+
 public extension Collection {
     func shuffled() -> [Iterator.Element] {
         var array = Array(self)
@@ -31,15 +34,35 @@ public extension MutableCollection {
 }
 
 class Concentration {
-    var cards = [Card]()
+    private(set) var cards = [Card]()
     
-    var indexOfOneAndOnlyFaceUpCard: Int?
-    var flipCount = 0
-    var scoreCount = 0
+    private var indexOfOneAndOnlyFaceUpCard: Int? {
+        get {
+            var indexOfFaceUpCard: Int?
+            for index in cards.indices {
+                if cards[index].isFaceUp {
+                    if indexOfFaceUpCard == nil {
+                        indexOfFaceUpCard = index
+                    } else {
+                        return nil
+                    }
+                }
+            }
+            return indexOfFaceUpCard
+        }
+        
+        set {
+            for index in cards.indices {
+                cards[index].isFaceUp = (index == newValue)
+            }
+        }
+    }
     
-    //let allAvailableThemes = ["Halloween", "Faces", "Animals"]
+    private(set) var flipCount = 0
+    private(set) var scoreCount = 0
     
     func chooseCard(at index: Int) {
+        assert(cards.indices.contains(index), "Concenration.chooseCard(at: \(index)): chosen index is not in the cards")
         self.flipCount += 1
         if !cards[index].isMatched {
             if let matchIndex = indexOfOneAndOnlyFaceUpCard, matchIndex != index {
@@ -55,24 +78,19 @@ class Concentration {
                     if cards[matchIndex].isSeen {
                         self.scoreCount -= 1
                     }
+                    cards[index].isSeen = true
                 }
                 
                 cards[index].isFaceUp = true
-                cards[index].isSeen = true
-                indexOfOneAndOnlyFaceUpCard = nil
+                
             } else {
-                //either no cards or 2 cards are face up
-                for flipDownIndex in cards.indices {
-                    cards[flipDownIndex].isFaceUp = false
-                }
-                cards[index].isFaceUp = true
-                //cards[index].isSeen = true
                 indexOfOneAndOnlyFaceUpCard = index
             }
         }
     }
     
     init(numberOfPairsOfCards: Int) {
+        assert(numberOfPairsOfCards > 0, "Concenration.init(\(numberOfPairsOfCards)): you must have at least one pair of cards")
         for _ in 1...numberOfPairsOfCards {
             let card = Card()
             cards += [card, card]

@@ -14,9 +14,9 @@ struct Card {
     var isSeen = false
     var identifier: Int
     
-    static var identifierFactory = 0
+    private static var identifierFactory = 0
     
-    static func getUniqIdentifier() -> Int {
+    private static func getUniqIdentifier() -> Int {
         identifierFactory += 1
         return identifierFactory
     }
